@@ -1,0 +1,35 @@
+package com.timeTracking.Time_Tracking_Service.model;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Entity
+@Data
+@NoArgsConstructor
+public class TimeTracker {
+
+    @Id
+    private long user_id;
+    private LocalTime clock_in;
+    private LocalTime clock_Out;
+    private boolean active=false;
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "dd-MM-yyyy")
+    private LocalDate clockInDate;
+    private LocalDate clockOutDate;
+    private String totalWorkingHours;
+
+    public TimeTracker(LocalTime clock_in, LocalTime clock_Out,LocalDate clockInDate,LocalDate clockOutDate,boolean active,String totalWorkingHours) {
+        this.clock_in = clock_in;
+        this.clock_Out = clock_Out;
+        this.clockInDate = clockInDate;
+        this.clockOutDate = clockOutDate;
+        this.active = active;
+        this.totalWorkingHours = totalWorkingHours;
+    }
+
+}
