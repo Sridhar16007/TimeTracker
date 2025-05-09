@@ -22,49 +22,29 @@ public class TimeTrackerService {
         TimeTracker user = timeTrackerRepo.findById(id).orElse(null);
 
         if (user != null && user.isActive() && today.equals(user.getClockInDate())) {
-            //  Clock out for the current session
+            // Clock out
             user.setClock_Out(LocalTime.now().withNano(0));
             user.setClockOutDate(today);
 
-            Duration sessionDuration = Duration.between(user.getClock_in(), user.getClock_Out());
-            long sessionMinutes = sessionDuration.toMinutes();
+            Duration totalDuration = Duration.between(user.getClock_in(), user.getClock_Out());
+            long totalMinutes = totalDuration.toMinutes();
+            long breakMinutes = user.getBreakTime();
+            long workingMinutes = totalMinutes - breakMinutes;
 
-            //  Accumulate total minutes
-            user.setTotalMinutes(user.getTotalMinutes() + sessionMinutes);
-
-            long working = user.getTotalMinutes() - user.getBreakTime();
-            user.setWorkingMinutes(working);
-
-            //  Set formatted values
-            user.setTotalHours(formatDuration(user.getTotalMinutes()));
-            user.setWorkingHours(formatDuration(user.getWorkingMinutes()));
-
+            user.setTotalHours(formatDuration(totalMinutes));
+            user.setWorkingHours(formatDuration(workingMinutes));
             user.setActive(false);
             user.setOnBreak(false);
 
             return timeTrackerRepo.save(user);
-
-        } else if (user != null && today.equals(user.getClockInDate())) {
-            //  Resume session (new clock-in on same day)
-            user.setClock_in(LocalTime.now().withNano(0));
-            user.setActive(true);
-            return timeTrackerRepo.save(user);
-
         } else {
-            //  New day or first-time entry
-            if (user == null) user = new TimeTracker();
-
+            // New day or first-time clock-in
+            user = new TimeTracker();
             user.setUser_id(id);
             user.setClock_in(LocalTime.now().withNano(0));
             user.setClockInDate(today);
             user.setActive(true);
-
-            // Reset all fields for new day
             user.setBreakTime(0);
-            user.setTotalMinutes(0);
-            user.setWorkingMinutes(0);
-            user.setTotalHours("0 hrs 0 mins");
-            user.setWorkingHours("0 hrs 0 mins");
             user.setOnBreak(false);
 
             return timeTrackerRepo.save(user);
@@ -85,17 +65,12 @@ public class TimeTrackerService {
             user.setBreakStart(now);
             user.setOnBreak(true);
         } else {
-            // End break and calculate total
+            // End break and calculate duration
             user.setBreakEnd(now);
             Duration breakDuration = Duration.between(user.getBreakStart(), user.getBreakEnd());
-            long totalBreak = user.getBreakTime() + breakDuration.toMinutes();
-            user.setBreakTime(totalBreak);
+            long breakMinutes = user.getBreakTime() + breakDuration.toMinutes();
+            user.setBreakTime(breakMinutes);
             user.setOnBreak(false);
-
-            // Recalculate working minutes
-            long working = user.getTotalMinutes() - user.getBreakTime();
-            user.setWorkingMinutes(working);
-            user.setWorkingHours(formatDuration(user.getWorkingMinutes()));
         }
 
         return timeTrackerRepo.save(user);

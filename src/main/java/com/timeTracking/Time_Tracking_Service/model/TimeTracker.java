@@ -34,10 +34,6 @@ public class TimeTracker {
     private LocalTime breakStart;
     private LocalTime breakEnd;
 
-    //  Added for internal calculations only
-    private long totalMinutes = 0;
-    private long workingMinutes = 0;
-
     public TimeTracker(LocalTime clock_in, LocalTime clock_Out, LocalDate clockInDate, LocalDate clockOutDate,
                        boolean active, String totalHours, long breakTime, String workingHours) {
         this.clock_in = clock_in;
