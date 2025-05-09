@@ -14,21 +14,21 @@ import java.time.LocalTime;
 @Entity
 @Data
 @NoArgsConstructor
-public class BreakLog {
+public class ClockLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private long userId;
 
-    private String eventType; // "BREAK_START" or "BREAK_END"
+    private String eventType; // "CLOCK_IN" or "CLOCK_OUT"
 
     private LocalTime eventTime;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate eventDate;
 
-    public BreakLog(long userId, String eventType, LocalTime eventTime, LocalDate eventDate) {
+    public ClockLog(long userId, String eventType, LocalTime eventTime, LocalDate eventDate) {
         this.userId = userId;
         this.eventType = eventType;
         this.eventTime = eventTime;

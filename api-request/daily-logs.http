@@ -1,0 +1,4 @@
+### GET request to daily logs
+GET http://localhost:8080/timetracking/dailylogs/20110?date=09-05-2025
+
+###

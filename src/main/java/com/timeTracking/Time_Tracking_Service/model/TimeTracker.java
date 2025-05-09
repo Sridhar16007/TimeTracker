@@ -1,3 +1,4 @@
+
 package com.timeTracking.Time_Tracking_Service.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,7 +15,7 @@ import java.time.LocalTime;
 public class TimeTracker {
 
     @Id
-    private long user_id;
+    private long userId;
 
     private LocalTime clock_in;
     private LocalTime clock_Out;
@@ -34,7 +35,7 @@ public class TimeTracker {
     private LocalTime breakStart;
     private LocalTime breakEnd;
 
-    //  Added for internal calculations only
+    // Added for internal calculations only
     private long totalMinutes = 0;
     private long workingMinutes = 0;
 

@@ -1,0 +1,4 @@
+### GET request to break logs
+GET http://localhost:8080/timetracking/breaklogs/20110?date=09-05-2025
+
+###
