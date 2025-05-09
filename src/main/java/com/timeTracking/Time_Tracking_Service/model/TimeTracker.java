@@ -15,21 +15,34 @@ public class TimeTracker {
 
     @Id
     private long user_id;
+
     private LocalTime clock_in;
     private LocalTime clock_Out;
-    private boolean active=false;
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "dd-MM-yyyy")
-    private LocalDate clockInDate;
-    private LocalDate clockOutDate;
-    private String totalWorkingHours;
 
-    public TimeTracker(LocalTime clock_in, LocalTime clock_Out,LocalDate clockInDate,LocalDate clockOutDate,boolean active,String totalWorkingHours) {
+    private boolean active = false;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate clockInDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate clockOutDate;
+
+    private String totalHours;
+    private long breakTime; // in minutes
+    private String workingHours;
+
+    private boolean onBreak = false;
+    private LocalTime breakStart;
+    private LocalTime breakEnd;
+
+    public TimeTracker(LocalTime clock_in, LocalTime clock_Out, LocalDate clockInDate, LocalDate clockOutDate,
+                       boolean active, String totalHours, long breakTime, String workingHours) {
         this.clock_in = clock_in;
         this.clock_Out = clock_Out;
         this.clockInDate = clockInDate;
         this.clockOutDate = clockOutDate;
         this.active = active;
-        this.totalWorkingHours = totalWorkingHours;
+        this.totalHours = totalHours;
+        this.breakTime = breakTime;
+        this.workingHours = workingHours;
     }
-
 }

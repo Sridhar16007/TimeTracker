@@ -11,42 +11,74 @@ import java.time.LocalTime;
 @Service
 public class TimeTrackerService {
 
-    private TimeTrackerRepo timeTrackerRepo;
+    private final TimeTrackerRepo timeTrackerRepo;
+
     public TimeTrackerService(TimeTrackerRepo timeTrackerRepo) {
         this.timeTrackerRepo = timeTrackerRepo;
     }
 
-    public TimeTracker toggle(long id) {
+    public TimeTracker toggleClock(long id) {
+        LocalDate today = LocalDate.now();
+        TimeTracker user = timeTrackerRepo.findById(id).orElse(null);
 
-        TimeTracker User = timeTrackerRepo.findById(id).get();
-
-        Duration duration;
-        String totalWorkingHours ;
-        long hours=0;
-        long minutes=0;
-
-        if (User.isActive()) {
+        if (user != null && user.isActive() && today.equals(user.getClockInDate())) {
             // Clock out
-            User.setClock_Out(LocalTime.now().withNano(0));
-            User.setClockOutDate(LocalDate.now());
+            user.setClock_Out(LocalTime.now().withNano(0));
+            user.setClockOutDate(today);
 
-            if(User.getClockOutDate().equals(User.getClockInDate())){
-                     duration = Duration.between(User.getClock_in(), User.getClock_Out());
-                    hours +=duration.toHours();
-                    minutes +=duration.toMinutes();
-                    totalWorkingHours=hours+" hrs "+minutes+" mins";
+            Duration totalDuration = Duration.between(user.getClock_in(), user.getClock_Out());
+            long totalMinutes = totalDuration.toMinutes();
+            long breakMinutes = user.getBreakTime();
+            long workingMinutes = totalMinutes - breakMinutes;
 
-                    User.setTotalWorkingHours(totalWorkingHours);
-            }
-            User.setActive(false);
-            return timeTrackerRepo.save(User);
+            user.setTotalHours(formatDuration(totalMinutes));
+            user.setWorkingHours(formatDuration(workingMinutes));
+            user.setActive(false);
+            user.setOnBreak(false);
+
+            return timeTrackerRepo.save(user);
         } else {
-            // Clock in
-            TimeTracker newRecord = new TimeTracker();
-            newRecord.setClock_in(LocalTime.now().withNano(0));
-            newRecord.setActive(true);
-            newRecord.setClockInDate(LocalDate.now());
-            return timeTrackerRepo.save(newRecord);
+            // New day or first-time clock-in
+            user = new TimeTracker();
+            user.setUser_id(id);
+            user.setClock_in(LocalTime.now().withNano(0));
+            user.setClockInDate(today);
+            user.setActive(true);
+            user.setBreakTime(0);
+            user.setOnBreak(false);
+
+            return timeTrackerRepo.save(user);
         }
+    }
+
+    public TimeTracker toggleBreak(long id) {
+        TimeTracker user = timeTrackerRepo.findById(id).orElseThrow();
+
+        if (!user.isActive()) {
+            throw new IllegalStateException("User is not clocked in.");
+        }
+
+        LocalTime now = LocalTime.now().withNano(0);
+
+        if (!user.isOnBreak()) {
+            // Start break
+            user.setBreakStart(now);
+            user.setOnBreak(true);
+        } else {
+            // End break and calculate duration
+            user.setBreakEnd(now);
+            Duration breakDuration = Duration.between(user.getBreakStart(), user.getBreakEnd());
+            long breakMinutes = user.getBreakTime() + breakDuration.toMinutes();
+            user.setBreakTime(breakMinutes);
+            user.setOnBreak(false);
+        }
+
+        return timeTrackerRepo.save(user);
+    }
+
+    private String formatDuration(long totalMinutes) {
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        return hours + " hrs " + minutes + " mins";
     }
 }
